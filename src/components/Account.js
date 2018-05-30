@@ -68,16 +68,7 @@ class Debits extends Component {
     handleChange(e) {
         let name = e.target.name;
         let value = e.target.value;
-        console.log('AMOUNT INITIAL',value);
-        this.setState({
-            [name]: value
-        })
-    }
-
-    handleChangeDescription(e) {
-        let name = e.target.name;
-        let value = e.target.value;
-        console.log('AMOUNT INITIAL',value);
+     //   console.log('AMOUNT INITIAL',value);
         this.setState({
             [name]: value
         })
@@ -86,25 +77,30 @@ class Debits extends Component {
     handleSubmit(e) {
         e.preventDefault();
         let sign = this.state.type === '/credits' ? 1 : -1;
+        let date = new Date();
+        let amount = parseInt(this.state.amount, 10);
+        let id = Math.random(100000)*9999;
         let data = {
-            amount: this.props.balance + parseInt(this.state.amount, 10) * sign,
-            description: this.state.description
+            balance: this.props.balance + amount * sign,
+            amount: amount,
+            description: this.state.description,
+            date: date,
+            type: this.state.type,
+            id: id
         }
-        
+        console.log(data);
         this.props.updateAccount(data);
     }
 
     render() {
         return (<div>
-
-
             <div>
                 <form onSubmit={this.handleSubmit}>
                     <label>Amount</label>
                     <input type="number" name="amount" min="1" onChange={this.handleChange}/>
                     <br/>
                     <label>Description</label>
-                    <input type="text" name="description" onChange={this.handleChangeDescription}/>
+                    <input type="text" name="description" onChange={this.handleChange}/>
                     <input type="submit" value="Submit" />
                 </form>
 

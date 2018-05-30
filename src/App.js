@@ -8,8 +8,6 @@ import services from './services/apiServices';
 import UserProfile from './components/UserProfile';
 import LogIn from './components/Login';
 
-import Debits from './components/Debits';
-import Credits from './components/Credits';
 import Account from './components/Account';
 
 
@@ -31,12 +29,12 @@ class App extends Component {
 
   componentDidMount() {
     if (!this.state.accountBalance)
-    services.getCredits()
+    services.getData('/credits')
       .then(credits => {
         this.setState({
           creditsData: credits.data
         })
-        services.getDebits()
+        services.getData('/debits')
           .then(debits => {
             this.setState({
               debitsData: debits.data
@@ -74,14 +72,23 @@ class App extends Component {
   }
 
   updateAccount(data) {
+    
     data.amount = parseInt(data.amount, 10);
+    let entry = {};
+    entry.id = data.id;
+    entry.amount = data.amount;
+    entry.description = data.description;
+    entry.date = data.date;
+    console.log("ENTRY ", entry);
+    let newCredits = {...this.state.creditsData};
+    
     this.setState({
-      accountBalance: data.amount,
+      accountBalance: data.balence,
+    //  creditsData: newCredits
     }, () => {
-      console.log('Updated account balance => ', this.state.accountBalance)
-     // this.componentDidMount();
+ //     console.log('Updated account balance => ', this.state.accountBalance)
     })
-    console.log("I GOT CALLED")
+ //   console.log("I GOT CALLED")
   }
 
   mockLogin = (logInInfo) => {

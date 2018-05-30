@@ -2,14 +2,6 @@ import axios from 'axios';
 
 const services = {};
 
-services.getDebits = (data) => {
-    return axios.get('/debits');
-}
-
-services.getCredits = (data) => {
-    return axios.get('/credits');
-}
-
 services.getData = (path) => {
     return axios.get(path);
 }
