@@ -4,39 +4,26 @@ import services from '../services/apiServices';
 import './DebitsCredits.css';
 
 
-class Debits extends Component {
+class Account extends Component {
 
-    constructor( props ) {
+    constructor(props) {
         super(props);
         this.state = {
             apiData: this.props.data,
             apiDataReseived: true,
             balance: this.props.balance,
-            type: '',
             amount : 0,
             description: ''
-        }
+        };
+
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
     }
 
-    componentDidMount() {
-        this.setState({type: window.location.pathname});
-        let path = this.state.type;
-        console.log(window.location);
-        if (!this.state.apiData ) {
-            services.getData(path)
-            .then(result => {
-                console.log(result.data);
-                this.setState({apiData: result.data, apiDataReceived: true});
-            }) 
-            .catch(err => console.log(err));
-        };
-     }
-
     renderData = () => {
         if (!this.state.apiData) return;
-        return (<tbody>
+        return (<table>
+            <tbody>
              {this.state.apiData.map((debit, index) => {
                     return (
                         <Fragment key={index}>
@@ -62,33 +49,30 @@ class Debits extends Component {
                         </Fragment>
                     );
                 })}
-    </tbody>)
+        </tbody>
+    </table>)
     };
 
     handleChange(e) {
         let name = e.target.name;
         let value = e.target.value;
-     //   console.log('AMOUNT INITIAL',value);
         this.setState({
             [name]: value
-        })
+        });
     }
 
     handleSubmit(e) {
         e.preventDefault();
-        let sign = this.state.type === '/credits' ? 1 : -1;
-        let date = new Date();
-        let amount = parseInt(this.state.amount, 10);
-        let id = Math.random(100000)*9999;
+        const sign = this.props.type === 'credits' ? 1 : -1;
+        const amount = parseInt(this.state.amount, 10);
         let data = {
             balance: this.props.balance + amount * sign,
             amount: amount,
             description: this.state.description,
-            date: date,
-            type: this.state.type,
-            id: id
+            date: new Date(),
+            type: this.props.type,
+            id: Math.random(10^8)
         }
-        console.log(data);
         this.props.updateAccount(data);
     }
 
@@ -119,4 +103,4 @@ class Debits extends Component {
     }
 }
 
-export default Debits;
+export default Account;

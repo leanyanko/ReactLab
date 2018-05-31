@@ -24,31 +24,23 @@ class App extends Component {
         memberSince: '08/03/2009'
       }
     }
+
     this.updateAccount = this.updateAccount.bind(this);
+    this.getAmounts = this.getAmounts.bind(this);
   }
 
   componentDidMount() {
-    if (!this.state.accountBalance)
     services.getData('/credits')
       .then(credits => {
-        this.setState({
-          creditsData: credits.data
-        })
-        services.getData('/debits')
-          .then(debits => {
-            this.setState({
-              debitsData: debits.data
-            }, () => {
-              this.getAmounts();
-            })
-          })
-          .catch(err => {
-            console.log(err)
-          })
+        this.setState({ creditsData: credits.data });
+        return services.getData('/debits')          
+      })
+      .then(debits => {
+        this.setState({ debitsData: debits.data }, this.getAmounts);
       })
       .catch(err => {
         console.log(err)
-      })
+      });
   }
 
   getAmounts() {
@@ -72,23 +64,28 @@ class App extends Component {
   }
 
   updateAccount(data) {
-    
-    data.amount = parseInt(data.amount, 10);
-    let entry = {};
-    entry.id = data.id;
-    entry.amount = data.amount;
-    entry.description = data.description;
-    entry.date = data.date;
-    console.log("ENTRY ", entry);
-    let newCredits = {...this.state.creditsData};
-    
-    this.setState({
-      accountBalance: data.balence,
-    //  creditsData: newCredits
-    }, () => {
- //     console.log('Updated account balance => ', this.state.accountBalance)
-    })
- //   console.log("I GOT CALLED")
+    const entry = {
+      id: data.id.toString(),
+      amount: parseInt(data.amount, 10),
+      description: data.description,
+      date: data.date
+    };
+
+    const newState = {
+      accountBalance: data.balance
+    };
+
+    if (data.type === 'credit') {
+      const newCredits = Array.prototype.slice.apply(this.state.creditsData);
+      newCredits.push(entry);
+      newState.creditsData = newCredits;
+    } else if (data.type === 'debit') {
+      const newDebits = Array.prototype.slice.apply(this.state.debitsData);
+      newDebits.push(entry);
+      newState.debitsData = newDebits;
+    }
+
+    this.setState(newState);
   }
 
   mockLogin = (logInInfo) => {
@@ -112,24 +109,23 @@ class App extends Component {
     );
 
     const CreditsComponent = () => (
-      <Account data={this.state.creditsData} balance={this.state.accountBalance} updateAccount={this.updateAccount}/>
+      <Account type="credit" data={this.state.creditsData} balance={this.state.accountBalance} updateAccount={this.updateAccount}/>
     );
 
     const DebitsComponent = () => (
-      <Account data={this.state.debitsData} balance={this.state.accountBalance} updateAccount={this.updateAccount}/>
+      <Account type="debit" data={this.state.debitsData} balance={this.state.accountBalance} updateAccount={this.updateAccount}/>
     );
-
 
     return (
      <Router>
-        <Switch> 
+        <Switch>
           <Route exact path="/" component={HomeComponent}/>
           <Route exact path="/userProfile" component={UserProfileComponent} />
 
           <Route exact path="/debits" component={DebitsComponent}/>
           <Route exact path="/credits" component={CreditsComponent}/>
 
-          {this.state.sumRecieved ? console.log('Full Anount => ', this.state.fullSum) : ''}
+          {this.state.sumRecieved ? console.log('Full Amount => ', this.state.fullSum) : ''}
         </Switch>
      </Router>
     );
